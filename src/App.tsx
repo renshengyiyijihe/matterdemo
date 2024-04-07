@@ -1,9 +1,18 @@
 import { useMount } from "ahooks";
 import "./App.css";
 
-import Matter, { Body, Composite, Runner } from "matter-js";
-const { Engine, Render, Bodies, Query, World, Mouse, MouseConstraint, Events } =
-  Matter;
+import Matter from "matter-js";
+const {
+  Engine,
+  Render,
+  Runner,
+  Bodies,
+  Composite,
+  World,
+  Mouse,
+  MouseConstraint,
+  Events,
+} = Matter;
 
 import Ao from "../ao.jpg";
 import Search from "../search.png";
@@ -77,7 +86,7 @@ function App() {
   useMount(() => {
     const engine = Engine.create();
     const render = Render.create({
-      element: document.getElementById("canvas-container"),
+      element: document.getElementById("canvas-container")!,
       engine: engine,
       options: {
         width: canvasWidth,
@@ -87,6 +96,7 @@ function App() {
         pixelRatio: 2,
       },
     });
+    const composite = Composite.create();
 
     // Define bodies
     const bodies = [];
@@ -120,6 +130,7 @@ function App() {
         element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
       };
       bodies.push(circleBody);
+      Composite.add(composite, circleBody);
     }
 
     const topWall = Bodies.rectangle(
@@ -154,7 +165,8 @@ function App() {
     );
 
     World.add(engine.world, [
-      ...bodies,
+      // ...bodies,
+      composite,
       topWall,
       bottomWall,
       leftWall,
@@ -165,7 +177,7 @@ function App() {
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse: mouse,
       constraint: {
-        stiffness: 0.2,
+        stiffness: 0.06,
         render: { visible: false },
       },
     });
@@ -186,6 +198,24 @@ function App() {
       abTopWall,
       abBottomWall
     );
+
+    Events.on(mouseConstraint, "startdrag", (event) => {
+      console.log("drag startdrag", event);
+
+      draggingBodyId = event.body.id;
+      draggingBody = event.body;
+      draggingElement = draggingBody.userData.element;
+    });
+
+    // Event to handle end of drag
+    Events.on(mouseConstraint, "enddrag", (event) => {
+      console.log("drag enddrag", event);
+    });
+
+    // Events.on(engine, 'beforeUpdate', (event) => {
+    //   console.log("drag beforeUpdate", event);
+    // });
+
     window.addEventListener("mousemove", (event) => {
       console.log("mousemove move circle", !draggingElement, event);
       if (!draggingElement) return;
@@ -213,10 +243,10 @@ function App() {
         draggingElement.style.left = x - radius + "px";
         draggingElement.style.top = y - radius + "px";
         if (draggingBodyId) {
-          console.log("mousemove enddrag", draggingBody);
+          console.log("drag mousemove enddrag", draggingBody);
           let world = engine.world;
-          let curBody = Composite.get(world, draggingBodyId, "body");
-          World.remove(world, curBody);
+          let curBody = Composite.get(composite, draggingBodyId, "body");
+          Composite.remove(composite, curBody);
           draggingBodyId = 0;
 
           const { src, width, height } = draggingBody.userData;
@@ -236,6 +266,8 @@ function App() {
       }
     });
 
+    
+
     window.addEventListener("mouseup", (event) => {
       if (!draggingElement) return;
 
@@ -252,7 +284,6 @@ function App() {
           radius,
         },
         render: {
-          // fillStyle: "red",
           sprite: {
             texture: src,
             xScale: 0.25,
@@ -272,48 +303,36 @@ function App() {
         element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
       };
 
+      Composite.add(composite, circleBody);
+
       // World.add(engine.world, mouseConstraint);
-      World.add(engine.world, [
-        circleBody,
-        topWall,
-        bottomWall,
-        leftWall,
-        rightWall,
-      ]);
+      // World.add(engine.world, [
+      //   circleBody,
+      //   topWall,
+      //   bottomWall,
+      //   leftWall,
+      //   rightWall,
+      // ]);
+      draggingBodyId = 0;
       // Runner.run(engine);
       // Render.run(render);
     });
 
-    window.addEventListener("resize", () => {
-      let allBodies = Composite.allBodies(engine.world);
-      let forceMagnitude = 0.16;
-      allBodies.forEach((body) => {
-        if (body.isStatic) return;
-        Body.applyForce(
-          body,
-          { x: body.position.x, y: body.position.y },
-          {
-            x: forceMagnitude * Math.random() - forceMagnitude / 2,
-            y: forceMagnitude * Math.random() - forceMagnitude / 2,
-          }
-        );
-      });
-    });
-
-    Events.on(mouseConstraint, "startdrag", (event) => {
-      console.log("startdrag", event);
-
-      draggingBodyId = event.body.id;
-      draggingBody = event.body;
-      draggingElement = draggingBody.userData.element;
-    });
-
-    // Event to handle end of drag
-    Events.on(mouseConstraint, "enddrag", (event) => {
-      // draggingBody = null;
-      // draggingElement = null;
-      console.log("enddrag", event);
-    });
+    // window.addEventListener("resize", () => {
+    //   let allBodies = Composite.allBodies(engine.world);
+    //   let forceMagnitude = 0.16;
+    //   allBodies.forEach((body) => {
+    //     if (body.isStatic) return;
+    //     Body.applyForce(
+    //       body,
+    //       { x: body.position.x, y: body.position.y },
+    //       {
+    //         x: forceMagnitude * Math.random() - forceMagnitude / 2,
+    //         y: forceMagnitude * Math.random() - forceMagnitude / 2,
+    //       }
+    //     );
+    //   });
+    // });
 
     // Engine.run(engine);
     Runner.run(engine);
