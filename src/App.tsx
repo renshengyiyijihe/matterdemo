@@ -10,6 +10,7 @@ const {
   Composite,
   World,
   Mouse,
+  Body,
   MouseConstraint,
   Events,
 } = Matter;
@@ -191,9 +192,9 @@ function App() {
       "circle?.getBoundingClientRect()",
       circle.getBoundingClientRect()
     );
-    const { x: abLeftWall, y: abTopWall = 0 } =
+    let { x: abLeftWall, y: abTopWall = 0 } =
       circle.getBoundingClientRect() || {};
-    const abRightWall = abLeftWall + canvasWidth,
+      let abRightWall = abLeftWall + canvasWidth,
       abBottomWall = abTopWall + canvasHeight;
     console.log(
       "abLeftWall, abRightWall, abTopWall, abBottomWall",
@@ -360,8 +361,15 @@ function App() {
     });
 
     window.addEventListener("resize", () => {
+      let obj= circle.getBoundingClientRect() || {};
+      abLeftWall = obj.x;
+      abTopWall = obj.y;
+      abRightWall = abLeftWall + canvasWidth,
+      abBottomWall = abTopWall + canvasHeight;
+
       let allBodies = Composite.allBodies(engine.world);
-      let forceMagnitude = 0.16;
+      console.log('allBodies', allBodies)
+      let forceMagnitude = 0.36;
       allBodies.forEach((body) => {
         if (body.isStatic) return;
         Body.applyForce(
