@@ -69,6 +69,8 @@ let blockList = [
 let draggingBody = null;
 let draggingElement = null;
 let draggingBodyId = 0;
+let lastScreenX = window.screenX;
+let lastScreenY = window.screenY;
 
 let curId = blockList.length + 1;
 
@@ -194,7 +196,7 @@ function App() {
     );
     let { x: abLeftWall, y: abTopWall = 0 } =
       circle.getBoundingClientRect() || {};
-      let abRightWall = abLeftWall + canvasWidth,
+    let abRightWall = abLeftWall + canvasWidth,
       abBottomWall = abTopWall + canvasHeight;
     console.log(
       "abLeftWall, abRightWall, abTopWall, abBottomWall",
@@ -361,14 +363,14 @@ function App() {
     });
 
     window.addEventListener("resize", () => {
-      let obj= circle.getBoundingClientRect() || {};
+      let obj = circle.getBoundingClientRect() || {};
       abLeftWall = obj.x;
       abTopWall = obj.y;
-      abRightWall = abLeftWall + canvasWidth,
-      abBottomWall = abTopWall + canvasHeight;
+      (abRightWall = abLeftWall + canvasWidth),
+        (abBottomWall = abTopWall + canvasHeight);
 
       let allBodies = Composite.allBodies(engine.world);
-      console.log('allBodies', allBodies)
+      console.log("allBodies", allBodies);
       let forceMagnitude = 0.36;
       allBodies.forEach((body) => {
         if (body.isStatic) return;
@@ -382,6 +384,42 @@ function App() {
         );
       });
     });
+
+    const handleChangeScreen = () => {
+      const { screenX: curScreenX, screenY: curScreenY } = window;
+      console.log(
+        "screenX, screenY, curScreenX, curScreenY",
+        lastScreenX,
+        lastScreenY,
+        curScreenX,
+        curScreenY,
+        curScreenX !== lastScreenX || curScreenY !== lastScreenY
+      );
+      if (curScreenX !== lastScreenX || curScreenY !== lastScreenY) {
+        let allBodies = Composite.allBodies(engine.world);
+        console.log("allBodies", allBodies);
+
+        lastScreenX = curScreenX;
+        lastScreenY = curScreenY;
+        let forceMagnitude = 0.16;
+        allBodies.forEach((body) => {
+          if (body.isStatic) return;
+          Body.applyForce(
+            body,
+            { x: body.position.x, y: body.position.y },
+            {
+              x: forceMagnitude * Math.random() - forceMagnitude / 2,
+              y: forceMagnitude * Math.random() - forceMagnitude / 2,
+            }
+          );
+        });
+      }
+      window.requestAnimationFrame(handleChangeScreen);
+    };
+    window.requestAnimationFrame(handleChangeScreen);
+    // setInterval(() => {
+    //   handleChangeScreen();
+    // }, 10);
 
     // Engine.run(engine);
     Runner.run(engine);
