@@ -359,21 +359,21 @@ function App() {
       // Render.run(render);
     });
 
-    // window.addEventListener("resize", () => {
-    //   let allBodies = Composite.allBodies(engine.world);
-    //   let forceMagnitude = 0.16;
-    //   allBodies.forEach((body) => {
-    //     if (body.isStatic) return;
-    //     Body.applyForce(
-    //       body,
-    //       { x: body.position.x, y: body.position.y },
-    //       {
-    //         x: forceMagnitude * Math.random() - forceMagnitude / 2,
-    //         y: forceMagnitude * Math.random() - forceMagnitude / 2,
-    //       }
-    //     );
-    //   });
-    // });
+    window.addEventListener("resize", () => {
+      let allBodies = Composite.allBodies(engine.world);
+      let forceMagnitude = 0.16;
+      allBodies.forEach((body) => {
+        if (body.isStatic) return;
+        Body.applyForce(
+          body,
+          { x: body.position.x, y: body.position.y },
+          {
+            x: forceMagnitude * Math.random() - forceMagnitude / 2,
+            y: forceMagnitude * Math.random() - forceMagnitude / 2,
+          }
+        );
+      });
+    });
 
     // Engine.run(engine);
     Runner.run(engine);
