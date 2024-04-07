@@ -69,6 +69,8 @@ let draggingBody = null;
 let draggingElement = null;
 let draggingBodyId = 0;
 
+let curId = blockList.length + 1;
+
 let minX = 0,
   minY = 0,
   canvasWidth = 296,
@@ -173,6 +175,8 @@ function App() {
       rightWall,
     ]);
 
+    // engine.world.gravity.y = 0.6; // 设置重力向下
+
     const mouse = Mouse.create(render.canvas);
     const mouseConstraint = MouseConstraint.create(engine, {
       mouse: mouse,
@@ -207,10 +211,52 @@ function App() {
       draggingElement = draggingBody.userData.element;
     });
 
-    // Event to handle end of drag
     Events.on(mouseConstraint, "enddrag", (event) => {
       console.log("drag enddrag", event);
     });
+
+    // Events.on(engine, "beforeUpdate", (event) => {
+    //   if (!draggingElement) return;
+    //   const {isCreate} = event;
+    //   if(!isCreate) return;
+
+    //   console.log("drag mouseup", event);
+
+    //   draggingElement = null;
+    //   // const { id } = draggingBody;
+    //   const { src, width, height } = draggingBody.userData;
+
+    //   let circleBody = Bodies.rectangle(50, 30, width, height, {
+    //     chamfer: {
+    //       radius,
+    //     },
+    //     render: {
+    //       sprite: {
+    //         texture: src,
+    //         xScale: 0.25,
+    //         yScale: 0.25,
+    //       },
+    //     },
+    //   });
+
+    //   circleBody.id = ++curId;
+
+    //   circleBody.userData = {
+    //     id: curId,
+    //     src,
+    //     width,
+    //     height,
+    //     info: 11,
+    //     element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
+    //   };
+    //   draggingBodyId = 0;
+
+    //   setTimeout(() => {
+    //     Composite.add(composite, circleBody);
+    //   }, 300);
+
+    //   // Composite.add(composite, circleBody);
+    // });
 
     // Events.on(engine, 'beforeUpdate', (event) => {
     //   console.log("drag beforeUpdate", event);
@@ -246,6 +292,7 @@ function App() {
           console.log("drag mousemove enddrag", draggingBody);
           let world = engine.world;
           let curBody = Composite.get(composite, draggingBodyId, "body");
+
           Composite.remove(composite, curBody);
           draggingBodyId = 0;
 
@@ -266,8 +313,6 @@ function App() {
       }
     });
 
-    
-
     window.addEventListener("mouseup", (event) => {
       if (!draggingElement) return;
 
@@ -275,6 +320,7 @@ function App() {
       const { scrollX } = window;
       const x = pageX - scrollX;
       if (x < abRightWall + bufferDistance) return;
+      // Events.trigger(engine, "beforeUpdate", {...event, isCreate: true});
       draggingElement = null;
       // const { id } = draggingBody;
       const { src, width, height } = draggingBody.userData;
@@ -292,10 +338,10 @@ function App() {
         },
       });
 
-      circleBody.id = draggingBodyId;
+      circleBody.id = ++curId;
 
       circleBody.userData = {
-        id: draggingBodyId,
+        id: curId,
         src,
         width,
         height,
@@ -303,16 +349,11 @@ function App() {
         element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
       };
 
-      Composite.add(composite, circleBody);
+      setTimeout(() => {
+        Composite.add(composite, circleBody);
+      }, 300);
 
-      // World.add(engine.world, mouseConstraint);
-      // World.add(engine.world, [
-      //   circleBody,
-      //   topWall,
-      //   bottomWall,
-      //   leftWall,
-      //   rightWall,
-      // ]);
+      // Composite.add(composite, circleBody);
       draggingBodyId = 0;
       // Runner.run(engine);
       // Render.run(render);
