@@ -93,6 +93,7 @@ function App() {
     const engine = Engine.create();
     engine.timing.timeScale = 0.8; // 减小时间步长
     engine.positionIterations = 10; // 增加positionIterations的值
+    engine.enableSleeping = true;
 
     const render = Render.create({
       element: document.getElementById("canvas-container")!,
@@ -160,9 +161,15 @@ function App() {
         isStatic: true,
       }
     );
-    const leftWall = Bodies.rectangle(minX, canvasHeight / 2, wallThickness, canvasHeight, {
-      isStatic: true,
-    });
+    const leftWall = Bodies.rectangle(
+      minX,
+      canvasHeight / 2,
+      wallThickness,
+      canvasHeight,
+      {
+        isStatic: true,
+      }
+    );
     const rightWall = Bodies.rectangle(
       minX + canvasWidth,
       canvasHeight / 2,
@@ -181,8 +188,6 @@ function App() {
       leftWall,
       rightWall,
     ]);
-
-    // engine.world.gravity.y = 0.6; // 设置重力向下
 
     const mouse = Mouse.create(render.canvas);
     const mouseConstraint = MouseConstraint.create(engine, {
@@ -222,49 +227,48 @@ function App() {
       console.log("drag enddrag", event);
     });
 
-    Events.on(engine, "beforeUpdate", (event) => {
-      if (!draggingElement) return;
-      const {isCreate} = event;
-      if(!isCreate) return;
+    // Events.on(engine, "beforeUpdate", (event) => {
+    //   if (!draggingElement) return;
+    //   const { isCreate } = event;
+    //   if (!isCreate) return;
 
-      console.log("drag mouseup", event);
+    //   console.log("drag mouseup", event);
 
-      draggingElement = null;
-      // const { id } = draggingBody;
-      const { src, width, height } = draggingBody.userData;
+    //   draggingElement = null;
+    //   // const { id } = draggingBody;
+    //   const { src, width, height } = draggingBody.userData;
 
-      let circleBody = Bodies.rectangle(50, 30, width, height, {
-        chamfer: {
-          radius,
-        },
-        render: {
-          sprite: {
-            texture: src,
-            xScale: 0.25,
-            yScale: 0.25,
-          },
-        },
-      });
+    //   let circleBody = Bodies.rectangle(50, 30, width, height, {
+    //     chamfer: {
+    //       radius,
+    //     },
+    //     render: {
+    //       sprite: {
+    //         texture: src,
+    //         xScale: 0.25,
+    //         yScale: 0.25,
+    //       },
+    //     },
+    //   });
 
-      // circleBody.id = ++curId;
+    //   // circleBody.id = ++curId;
 
-      circleBody.userData = {
-        id: ++curId,
-        src,
-        width,
-        height,
-        info: 11,
-        element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
-      };
-      draggingBodyId = 0;
+    //   circleBody.userData = {
+    //     id: ++curId,
+    //     src,
+    //     width,
+    //     height,
+    //     info: 11,
+    //     element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
+    //   };
+    //   draggingBodyId = 0;
 
-      // setTimeout(() => {
-        Composite.add(composite, circleBody);
-      // }, 300);
+    //   // setTimeout(() => {
+    //   Composite.add(composite, circleBody);
+    //   // }, 300);
 
-      // Composite.add(composite, circleBody);
-    });
-
+    //   // Composite.add(composite, circleBody);
+    // });
 
     window.addEventListener("mousemove", (event) => {
       console.log("mousemove move circle", !draggingElement, event);
@@ -297,9 +301,9 @@ function App() {
           let world = engine.world;
           let bodies = Composite.allBodies(engine.world);
 
-          let curBody = bodies.find(v => v?.userData?.id == draggingBodyId);
-          console.log('curBody', curBody)
-          if(!curBody) return ;
+          let curBody = bodies.find((v) => v?.userData?.id == draggingBodyId);
+          console.log("curBody", curBody);
+          if (!curBody) return;
           Composite.remove(composite, curBody);
           draggingBodyId = 0;
 
@@ -365,6 +369,26 @@ function App() {
       draggingBodyId = 0;
     });
 
+    window.addEventListener("mousedown", (event) => {
+      const { pageX, pageY } = event;
+      const { scrollX, scrollY } = window;
+      const x = pageX - scrollX,
+        y = pageY - scrollY;
+
+      // if(x > abRightWall || x < abLeftWall || y > abBottomWall || y < abTopWall) return;
+      // else {
+      const canvas = document
+        .getElementById("canvas-container")
+        ?.querySelector("canvas")!;
+      // canvas.tabIndex = -1;
+      // canvas.click();
+      // engine.enabled = true;
+      // Events.trigger(mouseConstraint, "update", event);
+      Engine.update(engine, 1000 / 60, 1);
+      console.log("tabIndex", event.button);
+      // }
+    });
+
     window.addEventListener("resize", () => {
       let obj = circle.getBoundingClientRect() || {};
       abLeftWall = obj.x;
@@ -373,7 +397,6 @@ function App() {
         (abBottomWall = abTopWall + canvasHeight);
 
       let allBodies = Composite.allBodies(engine.world);
-      console.log("allBodies", allBodies);
       let forceMagnitude = 0.36;
       allBodies.forEach((body) => {
         if (body.isStatic) return;
@@ -390,17 +413,9 @@ function App() {
 
     const handleChangeScreen = () => {
       const { screenX: curScreenX, screenY: curScreenY } = window;
-      console.log(
-        "screenX, screenY, curScreenX, curScreenY",
-        lastScreenX,
-        lastScreenY,
-        curScreenX,
-        curScreenY,
-        curScreenX !== lastScreenX || curScreenY !== lastScreenY
-      );
+
       if (curScreenX !== lastScreenX || curScreenY !== lastScreenY) {
         let allBodies = Composite.allBodies(engine.world);
-        console.log("allBodies", allBodies);
 
         lastScreenX = curScreenX;
         lastScreenY = curScreenY;
@@ -420,11 +435,6 @@ function App() {
       window.requestAnimationFrame(handleChangeScreen);
     };
     window.requestAnimationFrame(handleChangeScreen);
-    // setInterval(() => {
-    //   handleChangeScreen();
-    // }, 10);
-
-    // Engine.run(engine);
     Runner.run(engine);
     Render.run(render);
   });
