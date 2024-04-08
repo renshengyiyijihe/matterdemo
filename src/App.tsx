@@ -83,13 +83,17 @@ let maxX = minX + canvasWidth,
   bufferDistance = 0,
   radius = 20,
   width = 84,
-  height = 44;
+  height = 44,
+  wallThickness = 10;
 
 function App() {
   console.log("Matter", Matter);
 
   useMount(() => {
     const engine = Engine.create();
+    engine.timing.timeScale = 0.8; // 减小时间步长
+    engine.positionIterations = 10; // 增加positionIterations的值
+
     const render = Render.create({
       element: document.getElementById("canvas-container")!,
       engine: engine,
@@ -125,7 +129,7 @@ function App() {
           },
         }
       );
-      circleBody.id = i + 1;
+      // circleBody.id = i + 1;
 
       circleBody.userData = {
         id: i + 1,
@@ -142,7 +146,7 @@ function App() {
       minX + canvasWidth / 2,
       minY,
       canvasWidth,
-      1,
+      wallThickness,
       {
         isStatic: true,
       }
@@ -151,18 +155,18 @@ function App() {
       minX + canvasWidth / 2,
       canvasHeight,
       canvasWidth,
-      1,
+      wallThickness,
       {
         isStatic: true,
       }
     );
-    const leftWall = Bodies.rectangle(minX, canvasHeight / 2, 1, canvasHeight, {
+    const leftWall = Bodies.rectangle(minX, canvasHeight / 2, wallThickness, canvasHeight, {
       isStatic: true,
     });
     const rightWall = Bodies.rectangle(
       minX + canvasWidth,
       canvasHeight / 2,
-      1,
+      wallThickness,
       canvasHeight,
       {
         isStatic: true,
@@ -209,7 +213,7 @@ function App() {
     Events.on(mouseConstraint, "startdrag", (event) => {
       console.log("drag startdrag", event);
 
-      draggingBodyId = event.body.id;
+      draggingBodyId = event.body.userData.id;
       draggingBody = event.body;
       draggingElement = draggingBody.userData.element;
     });
@@ -218,52 +222,49 @@ function App() {
       console.log("drag enddrag", event);
     });
 
-    // Events.on(engine, "beforeUpdate", (event) => {
-    //   if (!draggingElement) return;
-    //   const {isCreate} = event;
-    //   if(!isCreate) return;
+    Events.on(engine, "beforeUpdate", (event) => {
+      if (!draggingElement) return;
+      const {isCreate} = event;
+      if(!isCreate) return;
 
-    //   console.log("drag mouseup", event);
+      console.log("drag mouseup", event);
 
-    //   draggingElement = null;
-    //   // const { id } = draggingBody;
-    //   const { src, width, height } = draggingBody.userData;
+      draggingElement = null;
+      // const { id } = draggingBody;
+      const { src, width, height } = draggingBody.userData;
 
-    //   let circleBody = Bodies.rectangle(50, 30, width, height, {
-    //     chamfer: {
-    //       radius,
-    //     },
-    //     render: {
-    //       sprite: {
-    //         texture: src,
-    //         xScale: 0.25,
-    //         yScale: 0.25,
-    //       },
-    //     },
-    //   });
+      let circleBody = Bodies.rectangle(50, 30, width, height, {
+        chamfer: {
+          radius,
+        },
+        render: {
+          sprite: {
+            texture: src,
+            xScale: 0.25,
+            yScale: 0.25,
+          },
+        },
+      });
 
-    //   circleBody.id = ++curId;
+      // circleBody.id = ++curId;
 
-    //   circleBody.userData = {
-    //     id: curId,
-    //     src,
-    //     width,
-    //     height,
-    //     info: 11,
-    //     element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
-    //   };
-    //   draggingBodyId = 0;
+      circleBody.userData = {
+        id: ++curId,
+        src,
+        width,
+        height,
+        info: 11,
+        element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
+      };
+      draggingBodyId = 0;
 
-    //   setTimeout(() => {
-    //     Composite.add(composite, circleBody);
-    //   }, 300);
+      // setTimeout(() => {
+        Composite.add(composite, circleBody);
+      // }, 300);
 
-    //   // Composite.add(composite, circleBody);
-    // });
+      // Composite.add(composite, circleBody);
+    });
 
-    // Events.on(engine, 'beforeUpdate', (event) => {
-    //   console.log("drag beforeUpdate", event);
-    // });
 
     window.addEventListener("mousemove", (event) => {
       console.log("mousemove move circle", !draggingElement, event);
@@ -294,8 +295,11 @@ function App() {
         if (draggingBodyId) {
           console.log("drag mousemove enddrag", draggingBody);
           let world = engine.world;
-          let curBody = Composite.get(composite, draggingBodyId, "body");
+          let bodies = Composite.allBodies(engine.world);
 
+          let curBody = bodies.find(v => v?.userData?.id == draggingBodyId);
+          console.log('curBody', curBody)
+          if(!curBody) return ;
           Composite.remove(composite, curBody);
           draggingBodyId = 0;
 
@@ -326,7 +330,7 @@ function App() {
       // Events.trigger(engine, "beforeUpdate", {...event, isCreate: true});
       draggingElement = null;
       // const { id } = draggingBody;
-      const { src, width, height } = draggingBody.userData;
+      const { src, width, height, id } = draggingBody.userData;
 
       let circleBody = Bodies.rectangle(50, 30, width, height, {
         chamfer: {
@@ -341,7 +345,7 @@ function App() {
         },
       });
 
-      circleBody.id = ++curId;
+      // circleBody.id = ++curId;
 
       circleBody.userData = {
         id: curId,
@@ -352,14 +356,13 @@ function App() {
         element: document.getElementById("circle1"), // 与id为'circle1'的元素关联
       };
 
-      setTimeout(() => {
-        Composite.add(composite, circleBody);
-      }, 300);
+      // setTimeout(() => {
+      //   Composite.add(composite, circleBody);
+      // }, 300);
 
-      // Composite.add(composite, circleBody);
+      Composite.add(composite, circleBody);
+      Engine.update(engine, 1000 / 60, 1);
       draggingBodyId = 0;
-      // Runner.run(engine);
-      // Render.run(render);
     });
 
     window.addEventListener("resize", () => {

@@ -558,6 +558,11 @@
   resolved "https://registry.npmmirror.com/@types/matter-js/-/matter-js-0.19.6.tgz#2fe5f3702573365272419c69f30c64158c5309ec"
   integrity sha512-ffk6tqJM5scla+ThXmnox+mdfCo3qYk6yMjQsNcrbo6eQ5DqorVdtnaL+1agCoYzxUjmHeiNB7poBMAmhuLY7w==
 
+"@types/p2@^0.7.44":
+  version "0.7.44"
+  resolved "https://registry.npmmirror.com/@types/p2/-/p2-0.7.44.tgz#ad906d83c33aa16da5043b87194cdf4dd0abbe68"
+  integrity sha512-EIgtRscxlzwoZmr1/vpyxTb5FVZTe6vJpD4ONciLzmd4M2mfnh8yiz845J0ZIQYdo9+N4NxXAXm6Wk8IhYNqXA==
+
 "@types/prop-types@*":
   version "15.7.12"
   resolved "https://registry.npmmirror.com/@types/prop-types/-/prop-types-15.7.12.tgz#12bb1e2be27293c1406acb6af1c3f3a1481d98c6"
@@ -1432,6 +1437,13 @@ p-locate@^5.0.0:
   dependencies:
     p-limit "^3.0.2"
 
+p2@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.npmmirror.com/p2/-/p2-0.7.1.tgz#25f2474d9bc3a6d3140a1da26a67c9e118ac9543"
+  integrity sha512-wJxG87tHPlAO1iwGettkiU4ptoytQDoJSeP+PV8aZVT//ZHlD2H2uMtIPnQG8MXAaGR9OI1o1pqBV1g/fpNgNw==
+  dependencies:
+    poly-decomp "0.1.1"
+
 parent-module@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npmmirror.com/parent-module/-/parent-module-1.0.1.tgz#691d2709e78c79fae3a156622452d00762caaaa2"
@@ -1468,6 +1480,11 @@ picomatch@^2.3.1:
   version "2.3.1"
   resolved "https://registry.npmmirror.com/picomatch/-/picomatch-2.3.1.tgz#3ba3833733646d9d3e4995946c1365a67fb07a42"
   integrity sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==
+
+poly-decomp@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.npmmirror.com/poly-decomp/-/poly-decomp-0.1.1.tgz#9f68c4fa558663791c9ba4c2df7283f3096c23c9"
+  integrity sha512-clSDtuC48FR2PL2z/+VIRhfnxC7776GlJgDNAh1ZIqYOiaGqrINB+xGIWQypLgpz6Z/Ht/w7rTFEGFRNuSPOuA==
 
 postcss@^8.4.36:
   version "8.4.38"
